@@ -1,0 +1,31 @@
+{
+	"manifest_version": 2,
+	"name": "Kaitan Word Learner",
+	"version": "0.1",
+
+	"description": "Compiles statistics of encountered words during rikaikun usage to aid in language learning.",
+
+	"browser_action": {
+		"default_icon": "images/ba.png"
+	},
+
+	"background": {
+		"scripts": ["background.js"]
+	},
+
+	"content_scripts":[
+		{
+			"matches": ["http://*/*", "https://*/*", "ftp://*/*", "file:///*"],
+			"js": ["jquery-3.1.1.js", "ktPopup.js"],
+			"all_frames":true
+		}
+	],
+
+	"web_accessible_resources": [
+		"css/ktPopup.css"
+	],
+
+	"permissions": [
+		"activeTab", "tabs"
+	]
+}
