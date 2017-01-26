@@ -4,7 +4,7 @@
     position: absolute;
     z-index: 99993;
     border: 1px solid #D0D0D0;
-    background: #ff4d4d;
+    background: #2F4F4F;
     padding: 4px;
     border-radius: 5px;
     top: 5px;
@@ -14,4 +14,9 @@
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+}
+
+#ktPopupBox .ktStatistics {
+    font-size: 11px;
+    color: #FFFFFF;
 }
