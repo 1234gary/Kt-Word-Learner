@@ -1,5 +1,11 @@
-var savedText;	//Highlighted text
+var highlightedText;
 var ktActivated = false;	//Extension enabled?
+
+//Properties of Saved Word
+function savedWord(numberOfTimesSeen, priority){
+    this.timesSeen = numberOfTimesSeen;
+    this.priority = priority;
+}
 
 //Query extension page on startup to determine if chrome app should start enabled
 $(function(){
@@ -56,16 +62,13 @@ function onKeyDown(ev){
 //Modify marked count of selected character
 function storeMarkedData(){
 	var values = {};
-	var key = savedText;
+	var key = highlightedText;
     chrome.storage.sync.get(key, function(obj){
         if (obj[key] == undefined){
-            values[key] = {"marks":1};
-		}else if (obj[key]["marks"] == undefined) {
-        	values[key] = obj[key];
-            values[key]["marks"] = 1;
+            values[key] = new savedWord(1, "none");
         }else{
             values[key] = obj[key];
-            values[key]["marks"] = obj[key]["marks"] + 1;
+            values[key].timesSeen += 1;
 		}
         chrome.storage.sync.set(values);
 		updateKtHTML();
@@ -75,23 +78,19 @@ function storeMarkedData(){
 //Modify priority of selected character
 function changePriority(){
     var values = {};
-    var key = savedText;
+    var key = highlightedText;
     values[key] = {"priority":"none"};
     chrome.storage.sync.get(key, function(obj){
         if (obj[key] == undefined){
-            values[key] = {"priority":"low"};
-        }else if (obj[key]["priority"] == undefined) {
-            values[key] = obj[key];
-            values[key]["priority"] = "low";
+            values[key] = new savedWord(0,"low");
         }else{
             values[key] = obj[key];
-        	switch (obj[key]["priority"]){
-				case "none": values[key]["priority"] = "low"; break;
-                case "low": values[key]["priority"] = "med"; break;
-                case "med": values[key]["priority"] = "high"; break;
-                case "high": values[key]["priority"] = "none"; break;
+        	switch (values[key].priority){
+				case "none": values[key].priority = "low"; break;
+                case "low": values[key].priority = "med"; break;
+                case "med": values[key].priority = "high"; break;
+                case "high": values[key].priority = "none"; break;
 			}
-
         }
         chrome.storage.sync.set(values);
         updateKtHTML();
@@ -102,7 +101,7 @@ function changePriority(){
 //Clear all data of selected character
 function clearMarkedData(){
     var values = {};
-    var key = savedText;
+    var key = highlightedText;
     values[key] = {};
     chrome.storage.sync.set(values, function(){
         updateKtHTML();
@@ -113,8 +112,8 @@ function clearMarkedData(){
 //Updates display text if selected text is changed
 function onMouseMove(ev){
 	var updatedText = getSelectionText();
-	if (updatedText != savedText){
-		savedText = updatedText;
+	if (updatedText != highlightedText){
+		highlightedText = updatedText;
         showPopup(ev)
 	}
 }
@@ -126,7 +125,7 @@ function showPopup(ev) {
     var $ktPopupBoxHTML = $(ktPopupBoxHTML);
 
     //Disable popup if nothing is selected
-    if (savedText == "") {
+    if (highlightedText == "") {
         $ktPopupBoxHTML.css("visibility", "hidden");
         return;
     } else {
@@ -143,20 +142,17 @@ function showPopup(ev) {
 
 //Updates HTML within ktPopupBox to show relevant content
 function updateKtHTML(){
-	var marks = 0;
+	var numberOfMarksOnWord = 0;
 	var priority = "none";
+    var key = highlightedText;
 
-    $(".ktVocab").html(savedText + " ");
-    chrome.storage.sync.get(savedText, function(obj){
-    	if (obj[savedText] != undefined){
-    		if (obj[savedText]["marks"] != undefined){
-    			marks = obj[savedText]["marks"];
-			}
-            if (obj[savedText]["priority"] != undefined){
-                priority = obj[savedText]["priority"];
-            }
+    $(".ktVocab").html(highlightedText + " ");
+    chrome.storage.sync.get(key, function(obj){
+    	if (obj[key] != undefined){
+            numberOfMarksOnWord = obj[key].timesSeen;
+            priority = obj[key].priority;
 		}
-        $(".ktStatistics").html(marks + " Mark(s), Priority: " + priority);
+        $(".ktStatistics").html(numberOfMarksOnWord + " Mark(s), Priority: " + priority);
     });
 }
 
@@ -186,14 +182,14 @@ function updateKtBoxColor(){
     var mainDoc = window.document;
     var ktPopupBoxHTML = mainDoc.getElementById('ktPopupBox');
     var $ktPopupBoxHTML = $(ktPopupBoxHTML);
-    chrome.storage.sync.get(savedText, function(obj){
+    chrome.storage.sync.get(highlightedText, function(obj){
 
     	//default case
         $ktPopupBoxHTML.css("background", "#2F4F4F");
 
-        if (obj[savedText] != undefined) {
-            if (obj[savedText]["priority"] != undefined) {
-                switch (obj[savedText]["priority"]) {
+        if (obj[highlightedText] != undefined) {
+            if (obj[highlightedText]["priority"] != undefined) {
+                switch (obj[highlightedText]["priority"]) {
                     case "low":
                         $ktPopupBoxHTML.css("background", "#006600");
                         break;

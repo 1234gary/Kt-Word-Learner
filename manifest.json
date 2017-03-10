@@ -5,12 +5,16 @@
 
 	"description": "Compiles statistics of encountered words during rikaikun usage to aid in language learning.",
 
-	"browser_action": {
-		"default_icon": "images/ba.png"
-	},
+	"permissions": [
+		"activeTab", "tabs", "storage", "unlimitedStorage"
+	],
 
 	"background": {
 		"scripts": ["background.js"]
+	},
+
+	"browser_action": {
+		"default_icon": "images/ba.png"
 	},
 
 	"content_scripts":[
@@ -23,9 +27,6 @@
 
 	"web_accessible_resources": [
 		"css/ktPopup.css"
-	],
-
-	"permissions": [
-		"activeTab", "tabs", "storage", "unlimitedStorage"
 	]
+
 }
