@@ -146,7 +146,7 @@ function updateKtHTML(){
 	var marks = 0;
 	var priority = "none";
 
-    $(".ktVocab").html(savedText);
+    $(".ktVocab").html(savedText + " ");
     chrome.storage.sync.get(savedText, function(obj){
     	if (obj[savedText] != undefined){
     		if (obj[savedText]["marks"] != undefined){
@@ -160,14 +160,25 @@ function updateKtHTML(){
     });
 }
 
-//Updates CSS within ktPopupBox
+//Updates CSS within ktPopupBox and rikaikun
 function updateKtCSS(ev){
     var mainDoc = window.document;
     var ktPopupBoxHTML = mainDoc.getElementById('ktPopupBox');
     var $ktPopupBoxHTML = $(ktPopupBoxHTML);
-    $ktPopupBoxHTML.css("top", ev.clientY);
-    $ktPopupBoxHTML.css("left", ev.clientX);
-	updateKtBoxColor();
+
+
+    var rikaikunCSS = mainDoc.getElementById('rikaichan-window');
+    if (!rikaikunCSS){
+        $ktPopupBoxHTML.css("top", window.scrollY + ev.clientY + 30);
+        $ktPopupBoxHTML.css("left", window.scrollX + ev.clientX);
+	}else{
+        $(rikaikunCSS).css("padding-top", 40);
+        $ktPopupBoxHTML.css("top", $(rikaikunCSS).css("top"));
+        $ktPopupBoxHTML.css("left", $(rikaikunCSS).css("left"));
+	}
+
+
+    updateKtBoxColor();
 }
 
 //Update priority color for ktPopupBox
@@ -201,9 +212,6 @@ function updateKtBoxColor(){
 
 //Initializes ktPopupBox HTML and CSS
 function initKtPopupBox(){
-    var mainDoc = window.document;
-    var ktPopupBoxHTML = mainDoc.getElementById('ktPopupBox');
-    var $ktPopupBoxHTML = $(ktPopupBoxHTML);
     var $ktPopupBoxCSS = $('<link />').appendTo('head');
     $ktPopupBoxCSS.attr({
         type: "text/css",
@@ -214,8 +222,8 @@ function initKtPopupBox(){
 
     $ktPopupBoxHTML = $('<div />').appendTo('body');
     $ktPopupBoxHTML.attr('id', 'ktPopupBox');
-    $ktPopupBoxHTML.append("<div class = 'ktVocab' />");
-    $ktPopupBoxHTML.append("<div class = 'ktStatistics' />");
+    $ktPopupBoxHTML.append("<span class = 'ktVocab' />");
+    $ktPopupBoxHTML.append("<span class = 'ktStatistics' />");
     console.log("ktPopupBox HTML Initialized");
 }
 
