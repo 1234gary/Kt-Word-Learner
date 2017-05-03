@@ -1,5 +1,6 @@
-var highlightedText;
-var ktActivated = false;	//Extension enabled?
+
+var highlightedText = "";
+var ktActivated = false;
 
 //Properties of Saved Word
 function savedWord(numberOfTimesSeen, priority){
@@ -102,20 +103,40 @@ function changePriority(){
 function clearMarkedData(){
     var values = {};
     var key = highlightedText;
-    values[key] = {};
+    values[key] = undefined;
     chrome.storage.sync.set(values, function(){
         updateKtHTML();
         updateKtBoxColor();
 	});
 }
 
-//Updates display text if selected text is changed
+//Updates display text if selected text is changed/rikaikun text is changed
 function onMouseMove(ev){
-	var updatedText = getSelectionText();
-	if (updatedText != highlightedText){
-		highlightedText = updatedText;
-        showPopup(ev)
-	}
+    setTimeout(function(){
+        var mainDoc = window.document;
+        var rikaikun = mainDoc.getElementById('rikaichan-window');
+        if (rikaikun){ //if rikaikun is in use, take text from rikaikun's display
+            var rikaiText = $(rikaikun).text();
+            if (rikaiText != ""){
+                var i = 0;
+                while (rikaiText[i] != " " && rikaiText[i] != "("){
+                    i += 1;
+                }
+                rikaiText = rikaiText.substring(0,i);
+            }
+            if (rikaiText != highlightedText){
+                highlightedText = rikaiText;
+                showPopup(ev)
+            }
+        }
+        else{ //else just take the highlighted text
+            var updatedText = getSelectionText();
+            if (updatedText != highlightedText){
+                highlightedText = updatedText;
+                showPopup(ev)
+            }
+        }
+    }, 100);
 }
 
 //Displays appropriate statistics in ktPopupBox
@@ -168,7 +189,7 @@ function updateKtCSS(ev){
         $ktPopupBoxHTML.css("top", window.scrollY + ev.clientY + 30);
         $ktPopupBoxHTML.css("left", window.scrollX + ev.clientX);
 	}else{
-        $(rikaikunCSS).css("padding-top", 40);
+        $(rikaikunCSS).css("padding-top", 35);
         $ktPopupBoxHTML.css("top", $(rikaikunCSS).css("top"));
         $ktPopupBoxHTML.css("left", $(rikaikunCSS).css("left"));
 	}
